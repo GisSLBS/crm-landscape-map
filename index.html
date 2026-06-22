@@ -129,7 +129,8 @@ header { background:var(--soil); border-bottom:2px solid var(--ochre); padding:1
 
 <!-- State Panel -->
 <div id="state-panel">
-  <div class="leg-title">Firms by State</div>
+  <div class="leg-title" id="state-panel-title">Firms by State</div>
+  <div style="font-size:0.6rem;color:var(--mist);margin-bottom:5px;font-style:italic;">Click to filter</div>
   <div id="state-counts"></div>
 </div>
 
@@ -250,18 +251,56 @@ function getSidebarTags(p) {
 }
 
 // STATE COUNTS
+let activeState = null;
+
 function updateStateCounts(markers) {
   const counts = {};
   markers.forEach(m => {
     const s = m.firmProps.state || 'Unknown';
     counts[s] = (counts[s] || 0) + 1;
   });
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,12);
-  document.getElementById('state-counts').innerHTML = sorted.map(([s,n]) =>
-    `<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:3px;">
-      <span>${s}</span><span style="color:var(--ochre);font-weight:600;">${n}</span>
-    </div>`
-  ).join('');
+  // Always use allMarkers for the full count list
+  const allCounts = {};
+  allMarkers.forEach(m => {
+    const s = m.firmProps.state || 'Unknown';
+    allCounts[s] = (allCounts[s] || 0) + 1;
+  });
+  const sorted = Object.entries(allCounts).sort((a,b) => b[1]-a[1]).slice(0,12);
+  document.getElementById('state-counts').innerHTML = sorted.map(([s,n]) => {
+    const isActive = activeState === s;
+    return `<div data-state="${s}" style="
+      display:flex;justify-content:space-between;gap:10px;margin-bottom:3px;
+      cursor:pointer;padding:2px 4px;border-radius:3px;
+      background:${isActive ? 'var(--ochre)' : 'transparent'};
+      color:${isActive ? 'var(--stone)' : 'inherit'};
+    " class="state-row">
+      <span>${s}</span>
+      <span style="font-weight:600;color:${isActive ? 'var(--stone)' : 'var(--ochre)'};">${n}</span>
+    </div>`;
+  }).join('');
+
+  // Add title if state active
+  const title = document.getElementById('state-panel-title');
+  if (activeState) {
+    title.textContent = `Filtering: ${activeState}`;
+    title.style.color = 'var(--ochre)';
+  } else {
+    title.textContent = 'Firms by State';
+    title.style.color = 'var(--ochre)';
+  }
+
+  // Bind click events
+  document.querySelectorAll('.state-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const s = row.dataset.state;
+      if (activeState === s) {
+        activeState = null;
+      } else {
+        activeState = s;
+      }
+      applyFilters();
+    });
+  });
 }
 
 // POPULATE LIST
@@ -294,13 +333,14 @@ function applyFilters() {
   const filtered = allMarkers.filter(m => {
     const p = m.firmProps;
     const matchFilter = activeFilter === 'all' || p[activeFilter] === 'Yes';
+    const matchState  = !activeState || p.state === activeState;
     const q = searchTerm.toLowerCase();
     const matchSearch = !q ||
       p.name.toLowerCase().includes(q) ||
       (p.city||'').toLowerCase().includes(q) ||
       (p.state||'').toLowerCase().includes(q) ||
       (p.states_served||'').toLowerCase().includes(q);
-    return matchFilter && matchSearch;
+    return matchFilter && matchState && matchSearch;
   });
   clusterGroup.clearLayers();
   clusterGroup.addLayers(filtered);
@@ -326,6 +366,7 @@ document.getElementById('search-input').addEventListener('input', e => {
 // EVENTS - Reset
 document.getElementById('reset-btn').addEventListener('click', () => {
   activeFilter = 'all';
+  activeState  = null;
   searchTerm = '';
   document.getElementById('search-input').value = '';
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
