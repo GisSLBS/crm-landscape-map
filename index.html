@@ -4,382 +4,109 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Great Lakes CRM Firm Landscape | SBS Geospatial</title>
-
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Marker Cluster -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --stone:    #2C2A25;
-    --soil:     #4A3728;
-    --ochre:    #C4893A;
-    --sage:     #5C7A5E;
-    --cream:    #F5F0E8;
-    --parchment:#EDE5D4;
-    --mist:     #D6CFC2;
-    --white:    #FFFFFF;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--stone);
-    color: var(--cream);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* HEADER */
-  header {
-    background: var(--soil);
-    border-bottom: 2px solid var(--ochre);
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    z-index: 1000;
-  }
-
-  .header-left h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    color: var(--ochre);
-    letter-spacing: 0.02em;
-  }
-
-  .header-left p {
-    font-size: 0.7rem;
-    color: var(--mist);
-    margin-top: 1px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .header-right {
-    font-size: 0.72rem;
-    color: var(--mist);
-    text-align: right;
-  }
-
-  .header-right span {
-    color: var(--ochre);
-    font-weight: 600;
-  }
-
-  /* LAYOUT */
-  .app-body {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* SIDEBAR */
-  #sidebar {
-    width: 280px;
-    background: var(--stone);
-    border-right: 1px solid #3a3830;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow: hidden;
-  }
-
-  .sidebar-section {
-    padding: 12px 14px;
-    border-bottom: 1px solid #3a3830;
-  }
-
-  .sidebar-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ochre);
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-
-  /* FILTERS */
-  .filter-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-  }
-
-  .filter-btn {
-    background: #3a3830;
-    border: 1px solid #4a4840;
-    color: var(--mist);
-    padding: 5px 7px;
-    border-radius: 4px;
-    font-size: 0.67rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .filter-btn:hover { border-color: var(--ochre); color: var(--cream); }
-  .filter-btn.active { background: var(--ochre); border-color: var(--ochre); color: var(--stone); font-weight: 600; }
-
-  .filter-btn.full-width {
-    grid-column: 1 / -1;
-    background: #2a2820;
-    color: var(--mist);
-    font-size: 0.65rem;
-  }
-
-  /* SEARCH */
-  #search-input {
-    width: 100%;
-    background: #3a3830;
-    border: 1px solid #4a4840;
-    color: var(--cream);
-    padding: 7px 10px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-  }
-
-  #search-input:focus { border-color: var(--ochre); }
-  #search-input::placeholder { color: var(--mist); opacity: 0.6; }
-
-  /* RESULTS LIST */
-  #firm-count {
-    font-size: 0.68rem;
-    color: var(--mist);
-    padding: 8px 14px 4px;
-  }
-
-  #firm-count span { color: var(--ochre); font-weight: 600; }
-
-  #firm-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 0 8px 0;
-  }
-
-  #firm-list::-webkit-scrollbar { width: 4px; }
-  #firm-list::-webkit-scrollbar-track { background: var(--stone); }
-  #firm-list::-webkit-scrollbar-thumb { background: #4a4840; border-radius: 2px; }
-
-  .firm-item {
-    padding: 8px 14px;
-    border-bottom: 1px solid #2a2820;
-    cursor: pointer;
-    transition: background 0.1s;
-  }
-
-  .firm-item:hover { background: #3a3830; }
-
-  .firm-item-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--cream);
-    line-height: 1.3;
-  }
-
-  .firm-item-meta {
-    font-size: 0.65rem;
-    color: var(--mist);
-    margin-top: 2px;
-  }
-
-  .firm-item-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    margin-top: 4px;
-  }
-
-  .tag {
-    font-size: 0.58rem;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-  }
-
-  .tag-arch { background: #3d5c3d; color: #8fc48f; }
-  .tag-hist { background: #5c4a20; color: #d4a85a; }
-  .tag-geo  { background: #3a3a5c; color: #8f8fdc; }
-  .tag-rpa  { background: #5c3030; color: #dc8f8f; }
-  .tag-uw   { background: #1e4a5c; color: #6abcd4; }
-
-  /* MAP */
-  #map {
-    flex: 1;
-    z-index: 1;
-  }
-
-  /* POPUP */
-  .leaflet-popup-content-wrapper {
-    background: var(--soil) !important;
-    border: 1px solid var(--ochre) !important;
-    border-radius: 6px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
-    color: var(--cream) !important;
-    font-family: 'Inter', sans-serif !important;
-  }
-
-  .leaflet-popup-tip { background: var(--soil) !important; }
-
-  .popup-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.95rem;
-    color: var(--ochre);
-    margin-bottom: 4px;
-    line-height: 1.3;
-  }
-
-  .popup-location {
-    font-size: 0.7rem;
-    color: var(--mist);
-    margin-bottom: 8px;
-  }
-
-  .popup-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-
-  .popup-row {
-    font-size: 0.7rem;
-    color: var(--mist);
-    margin-bottom: 3px;
-  }
-
-  .popup-row strong { color: var(--cream); }
-
-  .popup-link {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 0.7rem;
-    color: var(--ochre);
-    text-decoration: none;
-    border-bottom: 1px solid var(--ochre);
-    padding-bottom: 1px;
-  }
-
-  .popup-link:hover { color: var(--cream); border-color: var(--cream); }
-
-  .popup-notes {
-    font-size: 0.66rem;
-    color: var(--mist);
-    margin-top: 6px;
-    font-style: italic;
-    border-top: 1px solid #4a3728;
-    padding-top: 6px;
-  }
-
-  /* Legend */
-  .map-legend {
-    position: absolute;
-    bottom: 28px;
-    right: 10px;
-    background: var(--soil);
-    border: 1px solid var(--ochre);
-    border-radius: 5px;
-    padding: 10px 12px;
-    z-index: 500;
-    font-size: 0.67rem;
-    color: var(--mist);
-    min-width: 130px;
-  }
-
-  .map-legend .leg-title {
-    color: var(--ochre);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.6rem;
-    margin-bottom: 6px;
-  }
-
-  .leg-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 4px;
-  }
-
-  .leg-dot {
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.3);
-  }
-
-  .reset-btn {
-    display: block;
-    width: 100%;
-    margin-top: 8px;
-    padding: 5px;
-    background: #3a3830;
-    border: 1px solid #4a4840;
-    color: var(--mist);
-    border-radius: 3px;
-    font-size: 0.65rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    text-align: center;
-  }
-  .reset-btn:hover { border-color: var(--ochre); color: var(--cream); }
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --stone:#2C2A25; --soil:#4A3728; --ochre:#C4893A;
+  --sage:#5C7A5E; --cream:#F5F0E8; --parchment:#EDE5D4;
+  --mist:#D6CFC2;
+}
+body { font-family:'Inter',sans-serif; background:var(--stone); color:var(--cream); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+header { background:var(--soil); border-bottom:2px solid var(--ochre); padding:10px 20px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; z-index:1000; }
+.header-left h1 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--ochre); }
+.header-left p { font-size:0.7rem; color:var(--mist); margin-top:1px; letter-spacing:0.08em; text-transform:uppercase; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.header-info { font-size:0.72rem; color:var(--mist); text-align:right; }
+.header-info span { color:var(--ochre); font-weight:600; }
+.hdr-btn { background:var(--ochre); border:none; color:var(--stone); width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:1rem; flex-shrink:0; }
+.hdr-btn.secondary { background:#3a3830; border:1px solid #4a4840; color:var(--mist); font-size:0.8rem; }
+.hdr-btn:hover { opacity:0.85; }
+.app-body { display:flex; flex:1; overflow:hidden; }
+#sidebar { width:270px; background:var(--stone); border-right:1px solid #3a3830; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+.sidebar-section { padding:10px 14px; border-bottom:1px solid #3a3830; }
+.sidebar-label { font-size:0.62rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ochre); margin-bottom:7px; font-weight:600; }
+.filter-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+.filter-btn { background:#3a3830; border:1px solid #4a4840; color:var(--mist); padding:5px 7px; border-radius:4px; font-size:0.67rem; font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s; }
+.filter-btn:hover { border-color:var(--ochre); color:var(--cream); }
+.filter-btn.active { background:var(--ochre); border-color:var(--ochre); color:var(--stone); font-weight:600; }
+.filter-btn.full-width { grid-column:1/-1; }
+#search-input { width:100%; background:#3a3830; border:1px solid #4a4840; color:var(--cream); padding:7px 10px; border-radius:4px; font-size:0.75rem; font-family:'Inter',sans-serif; outline:none; }
+#search-input:focus { border-color:var(--ochre); }
+#search-input::placeholder { color:var(--mist); opacity:0.6; }
+#firm-count { font-size:0.68rem; color:var(--mist); padding:7px 14px 3px; }
+#firm-count span { color:var(--ochre); font-weight:600; }
+#firm-list { flex:1; overflow-y:auto; }
+#firm-list::-webkit-scrollbar { width:4px; }
+#firm-list::-webkit-scrollbar-thumb { background:#4a4840; border-radius:2px; }
+.firm-item { padding:7px 14px; border-bottom:1px solid #2a2820; cursor:pointer; transition:background 0.1s; }
+.firm-item:hover { background:#3a3830; }
+.firm-item-name { font-size:0.74rem; font-weight:500; color:var(--cream); line-height:1.3; }
+.firm-item-meta { font-size:0.64rem; color:var(--mist); margin-top:2px; }
+.firm-item-tags { display:flex; flex-wrap:wrap; gap:3px; margin-top:3px; }
+.tag { font-size:0.58rem; padding:1px 5px; border-radius:3px; font-weight:500; }
+.tag-arch { background:#3d5c3d; color:#8fc48f; }
+.tag-hist { background:#5c4a20; color:#d4a85a; }
+.tag-geo  { background:#3a3a5c; color:#8f8fdc; }
+.tag-rpa  { background:#5c3030; color:#dc8f8f; }
+.tag-uw   { background:#1e4a5c; color:#6abcd4; }
+#map { flex:1; z-index:1; }
+.leaflet-popup-content-wrapper { background:var(--soil)!important; border:1px solid var(--ochre)!important; border-radius:6px!important; color:var(--cream)!important; font-family:'Inter',sans-serif!important; }
+.leaflet-popup-tip { background:var(--soil)!important; }
+.popup-name { font-family:'Playfair Display',serif; font-size:0.95rem; color:var(--ochre); margin-bottom:3px; }
+.popup-location { font-size:0.7rem; color:var(--mist); margin-bottom:6px; }
+.popup-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:7px; }
+.popup-row { font-size:0.7rem; color:var(--mist); margin-bottom:3px; }
+.popup-row strong { color:var(--cream); }
+.popup-link { display:inline-block; margin-top:6px; font-size:0.7rem; color:var(--ochre); text-decoration:none; border-bottom:1px solid var(--ochre); }
+.popup-notes { font-size:0.66rem; color:var(--mist); margin-top:6px; font-style:italic; border-top:1px solid #4a3728; padding-top:5px; }
+.popup-source { font-size:0.62rem; color:#6a6458; margin-top:4px; }
+/* Legend */
+.map-legend { position:absolute; bottom:28px; right:10px; background:var(--soil); border:1px solid var(--ochre); border-radius:5px; padding:10px 12px; z-index:500; font-size:0.67rem; color:var(--mist); min-width:130px; }
+.leg-title { color:var(--ochre); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; font-size:0.6rem; margin-bottom:6px; }
+.leg-row { display:flex; align-items:center; gap:7px; margin-bottom:4px; }
+.leg-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.3); }
+.reset-btn { display:block; width:100%; margin-top:8px; padding:5px; background:#3a3830; border:1px solid #4a4840; color:var(--mist); border-radius:3px; font-size:0.65rem; font-family:'Inter',sans-serif; cursor:pointer; }
+.reset-btn:hover { border-color:var(--ochre); color:var(--cream); }
+/* State panel */
+#state-panel { position:absolute; top:90px; right:10px; background:var(--soil); border:1px solid var(--ochre); border-radius:5px; padding:10px 12px; z-index:500; font-size:0.67rem; color:var(--mist); min-width:130px; }
+/* About modal */
+#about-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
+#about-modal.open { display:flex; }
+.modal-box { background:var(--soil); border:1px solid var(--ochre); border-radius:8px; padding:26px 30px; max-width:500px; width:90%; position:relative; }
+.modal-box h2 { font-family:'Playfair Display',serif; color:var(--ochre); font-size:1.05rem; margin-bottom:10px; }
+.modal-box p { font-size:0.76rem; line-height:1.7; color:var(--mist); margin-bottom:8px; }
+.modal-box p strong { color:var(--cream); }
+#close-about { position:absolute; top:10px; right:12px; background:none; border:none; color:var(--mist); font-size:1.1rem; cursor:pointer; }
 </style>
 </head>
 <body>
-
 <header>
   <div class="header-left">
     <h1>Great Lakes CRM Firm Landscape</h1>
     <p>Cultural Resource Management &middot; Great Lakes Region &middot; SBS Geospatial</p>
   </div>
-  <div class="header-right" style="display:flex;align-items:center;gap:12px;">
-    <span style="font-size:0.7rem;color:var(--mist);text-align:right;">
+  <div class="header-right">
+    <div class="header-info">
       Data sourced from OH, MI, WI &amp; PA SHPOs<br>
-      <span id="total-count">159</span> firms &middot; Updated June 2026
-    </span>
-    <button id="home-btn" title="Reset to home view" style="
-      background:var(--ochre);border:none;color:var(--stone);
-      width:32px;height:32px;border-radius:4px;cursor:pointer;
-      font-size:1rem;display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;">⌂</button>
-    <button id="about-btn" title="About this map" style="
-      background:#3a3830;border:1px solid #4a4840;color:var(--mist);
-      width:32px;height:32px;border-radius:4px;cursor:pointer;
-      font-size:0.85rem;display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;">?</button>
+      <span>159</span> firms &middot; Updated June 2026
+    </div>
+    <button class="hdr-btn" id="home-btn" title="Reset view">⌂</button>
+    <button class="hdr-btn secondary" id="about-btn" title="About">?</button>
   </div>
 </header>
 
 <div class="app-body">
-
   <div id="sidebar">
-
     <div class="sidebar-section">
       <div class="sidebar-label">Search</div>
       <input type="text" id="search-input" placeholder="Firm name, city, state...">
     </div>
-
     <div class="sidebar-section">
       <div class="sidebar-label">Filter by Specialty</div>
       <div class="filter-grid">
@@ -394,71 +121,19 @@
         <button class="filter-btn" data-filter="landscape_arch">Landscape Arch</button>
       </div>
     </div>
-
     <div id="firm-count"><span id="visible-count">159</span> firms shown</div>
-
     <div id="firm-list"></div>
-
   </div>
-
   <div id="map"></div>
-
 </div>
 
-<!-- Legend -->
-<!-- About Modal -->
-<div id="about-modal" style="
-  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;">
-  <div style="
-    background:var(--soil);border:1px solid var(--ochre);border-radius:8px;
-    padding:28px 32px;max-width:520px;width:90%;color:var(--cream);
-    font-family:Inter,sans-serif;position:relative;">
-    <button id="close-about" style="
-      position:absolute;top:12px;right:14px;background:none;border:none;
-      color:var(--mist);font-size:1.2rem;cursor:pointer;">✕</button>
-    <h2 style="font-family:'Playfair Display',serif;color:var(--ochre);margin-bottom:12px;font-size:1.1rem;">
-      About This Map
-    </h2>
-    <p style="font-size:0.78rem;line-height:1.7;color:var(--mist);margin-bottom:10px;">
-      The <strong style="color:var(--cream);">Great Lakes CRM Firm Landscape</strong> is an interactive directory of 
-      159 cultural resource management (CRM) consulting firms operating across the Great Lakes region, 
-      compiled from four state SHPO consultant lists (Ohio, Michigan, Wisconsin, and Pennsylvania) 
-      and supplementary web research.
-    </p>
-    <p style="font-size:0.78rem;line-height:1.7;color:var(--mist);margin-bottom:10px;">
-      <strong style="color:var(--cream);">Data sources:</strong> Ohio History Connection SHPO Consultant List, 
-      Michigan SHPO Qualified Consultant List, Wisconsin Historical Society Archaeological Consultants List, 
-      Pennsylvania SHPO. Data current as of June 2026.
-    </p>
-    <p style="font-size:0.78rem;line-height:1.7;color:var(--mist);margin-bottom:10px;">
-      <strong style="color:var(--cream);">Methodology:</strong> Firm locations represent HQ city centroids. 
-      Firms appearing on multiple state lists are deduplicated. Specialty designations reflect qualifications 
-      submitted to SHPO offices and do not constitute endorsement.
-    </p>
-    <p style="font-size:0.78rem;line-height:1.7;color:var(--mist);">
-      <strong style="color:var(--cream);">Built with:</strong> Leaflet.js, OpenStreetMap, Leaflet.MarkerCluster. 
-      Compiled and mapped by <strong style="color:var(--ochre);">Stephanie Bechard-Smith | SBS Geospatial</strong>.
-    </p>
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid #4a3728;font-size:0.7rem;color:var(--mist);">
-      <a href="https://sbsgeospatial.maps.arcgis.com" target="_blank" style="color:var(--ochre);">
-        sbsgeospatial.maps.arcgis.com ↗
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- State Count Panel -->
-<div id="state-panel" style="
-  position:absolute;top:90px;right:10px;
-  background:var(--soil);border:1px solid var(--ochre);
-  border-radius:5px;padding:10px 12px;z-index:500;
-  font-size:0.67rem;color:var(--mist);min-width:110px;">
-  <div style="color:var(--ochre);font-weight:600;letter-spacing:0.08em;
-    text-transform:uppercase;font-size:0.6rem;margin-bottom:6px;">Firms by State</div>
+<!-- State Panel -->
+<div id="state-panel">
+  <div class="leg-title">Firms by State</div>
   <div id="state-counts"></div>
 </div>
 
+<!-- Legend -->
 <div class="map-legend">
   <div class="leg-title">Specialty</div>
   <div class="leg-row"><div class="leg-dot" style="background:#2A6E3F"></div>Archaeology</div>
@@ -468,24 +143,33 @@
   <button class="reset-btn" id="reset-btn">Reset Filters</button>
 </div>
 
+<!-- About Modal -->
+<div id="about-modal">
+  <div class="modal-box">
+    <button id="close-about">✕</button>
+    <h2>About This Map</h2>
+    <p>The <strong>Great Lakes CRM Firm Landscape</strong> is an interactive directory of 159 cultural resource management (CRM) consulting firms operating across the Great Lakes region, compiled from four state SHPO consultant lists and supplementary web research.</p>
+    <p><strong>Data sources:</strong> Ohio History Connection SHPO, Michigan SHPO, Wisconsin Historical Society, Pennsylvania SHPO. Data current as of June 2026.</p>
+    <p><strong>Methodology:</strong> Firm locations represent HQ city centroids. Firms appearing on multiple state lists are deduplicated. Specialty designations reflect qualifications submitted to SHPO offices.</p>
+    <p><strong>Built with:</strong> Leaflet.js &middot; OpenStreetMap &middot; Leaflet.MarkerCluster</p>
+    <p>Compiled and mapped by <strong style="color:var(--ochre)">Stephanie Bechard-Smith | SBS Geospatial</strong><br>
+    <a href="https://sbsgeospatial.maps.arcgis.com" target="_blank" style="color:var(--ochre);font-size:0.72rem;">sbsgeospatial.maps.arcgis.com ↗</a></p>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-// ── DATA ──────────────────────────────────────────────────────────────────
+
 const firmData = {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.3952, 39.2059]}, "properties": {"name": "106 Consulting", "city": "Deer Park", "state": "OH", "website": "", "email": "louisbubb@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "MI SHPO Arch", "notes": "Independent consultant"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.0458, 42.3314]}, "properties": {"name": "313 Historic Preservation", "city": "Detroit", "state": "MI", "website": "313hp.com", "email": "dbilobran@313hp.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "A.D. Marble & Company, Inc.", "city": "Pennsylvania", "state": "PA", "website": "admarble.com", "email": "fmikolic@admarble.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.8358, 42.5631]}, "properties": {"name": "Accurate Archaeological Consulting Services", "city": "Charlotte", "state": "MI", "website": "", "email": "Mandymkramer@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "Acorn Hill Strategies, LLC", "city": "Pittsburgh", "state": "PA", "website": "acornhillstrategies.com", "email": "arcarlino@acornhillstrategies.com", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": "Historic Tax Credit, HP Planning"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Adena Environmental Consultants", "city": "Pennsylvania", "state": "PA", "website": "", "email": "jacobspuck@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": "Geophysical survey also"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "AECOM", "city": "Cincinnati", "state": "OH", "website": "aecom.com", "email": "stephen.hinks@aecom.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "Multi/National", "source": "MI SHPO Arch+HA", "notes": "Large global engineering firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Allegheny Archaeology Research", "city": "Pennsylvania", "state": "PA", "website": "alleghenyarchaeologyresearch.org", "email": "36fo65@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-80.1426, 39.4851]}, "properties": {"name": "Allstar Ecology, LLC", "city": "Fairmont", "state": "WV", "website": "allstarecology.com", "email": "victoria@allstarecology.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WV/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-91.6707, 44.5691]}, "properties": {"name": "ANK Archaeological Consulting", "city": "Mondovi", "state": "WI", "website": "", "email": "Amykoller387@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9684, 40.5312]}, "properties": {"name": "Apogee Environmental and Archaeological, Inc.", "city": "Glenshaw", "state": "PA", "website": "apogee-environmental.com", "email": "garrett@apogee-environmental.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "Yes", "rpa": "Yes", "states_served": "PA/KY/multi", "source": "MI SHPO Arch+HA", "notes": "Archaeology, arch history, maritime"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.3864, 40.1934]}, "properties": {"name": "Applied Anthropology Laboratories / Ball State", "city": "Muncie", "state": "IN", "website": "", "email": "kcnolan@bsu.edu", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IN", "source": "MI SHPO Arch", "notes": "Academic/university lab"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.4327, 42.4484]}, "properties": {"name": "Arbre Croche Cultural Resources LLC", "city": "Leslie", "state": "MI", "website": "", "email": "mjackson@arbrecroche.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "Arcadis, Inc.", "city": "Cincinnati", "state": "OH", "website": "arcadis.com/en-us", "email": "shelby.frideger@arcadis.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "Multi/National", "source": "SHPO Arch", "notes": "Large international firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.4012, 43.0731]}, "properties": {"name": "Archaeological Consulting & Services", "city": "Madison", "state": "WI", "website": "", "email": "psalkin.acs@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": "Prehistoric & Historic"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.2219, 39.2995]}, "properties": {"name": "Archaeological Research Institute", "city": "Batesville", "state": "IN", "website": "exploreari.org", "email": "rachel@exploreari.org", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IN/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "ASC Group, Inc.", "city": "Columbus", "state": "OH", "website": "ascgroup.net", "email": "dterpstra@ascgroup.net", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH/multi", "source": "SHPO HA+Arch", "notes": "David Klinge (archaeology), Kevin Schwarz (arch)"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.7799, 42.5295]}, "properties": {"name": "ASTI Environmental", "city": "Brighton", "state": "MI", "website": "asti-env.com", "email": "cyelonek@asti-env.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.0341, 42.6828]}, "properties": {"name": "Athena Research Consultants LLC", "city": "Shelby Township", "state": "MI", "website": "athenaresearchconsultants.com", "email": "info@athenaresearchconsultants.com", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "SHPO HA", "notes": "History only"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-97.7431, 30.2672]}, "properties": {"name": "Atkins Global", "city": "Austin", "state": "TX", "website": "atkinsglobal.com", "email": "Krista.mcclanahan@atkinsglobal.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "Multi/National", "source": "MI SHPO Arch+HA", "notes": "Large global engineering firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.2219, 42.4734]}, "properties": {"name": "Atwell", "city": "Southfield", "state": "MI", "website": "atwell-group.com", "email": "mchouest@atwell-group.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI/OR/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.4457, 41.1484]}, "properties": {"name": "Aurora Research Associates LLC", "city": "Silver Lake", "state": "OH", "website": "aurora-llc.com", "email": "courtney@aurora-llc.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/WV", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0595, 42.6858]}, "properties": {"name": "AVD Archaeological Services, Inc.", "city": "Union Grove", "state": "WI", "website": "", "email": "allenvandyke@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WI/multi", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.265, 44.9778]}, "properties": {"name": "Barr Engineering Co.", "city": "Minneapolis", "state": "MN", "website": "barr.com", "email": "vparsell@barr.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "MN/multi", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-92.1138, 43.3772]}, "properties": {"name": "Bear Creek Archeology, Inc.", "city": "Cresco", "state": "IA", "website": "BearCreekArcheology.com", "email": "BCA@BearCreekArcheology.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IA/WI/multi", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "Big Pine Consultants, LLC", "city": "Pittsburgh", "state": "PA", "website": "bigpineconsultants.com", "email": "ldugas@bigpineconsultants.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "PA/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-92.8727, 46.4858]}, "properties": {"name": "Blondo Consulting, LLC", "city": "Kettle River", "state": "MN", "website": "blondoconsulting.com", "email": "steven@blondoconsulting.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MN/WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.4457, 41.1484]}, "properties": {"name": "Bloom Preservation Consulting", "city": "Silver Lake", "state": "OH", "website": "", "email": "polly.bloom@gmail.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "Independent consultant"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "Brandstetter Carroll, Inc.", "city": "Cleveland", "state": "OH", "website": "brandstettercarroll.com", "email": "rparker@bciaep.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "Architecture/engineering"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.1327, 39.6284]}, "properties": {"name": "Brown & Bills Architects, Inc.", "city": "Centerville", "state": "OH", "website": "brownandbills.com", "email": "davebills@brownandbills.com", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0109, 41.8089]}, "properties": {"name": "Burns McDonnell", "city": "Downers Grove", "state": "IL", "website": "burnsmcd.com", "email": "dkullen@burnsmcd.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IL/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.3343, 44.4608]}, "properties": {"name": "Central Wisconsin Archaeological Consulting LLC", "city": "Amherst Junction", "state": "WI", "website": "", "email": "cwacgeoarch@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-75.1652, 39.9526]}, "properties": {"name": "Chestnut Hill Archaeological and Research Management LLC", "city": "Philadelphia", "state": "PA", "website": "chestnuthillarchaeology.com", "email": "glattanzi@icloud.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.844, 40.5065]}, "properties": {"name": "Christine Davis Consultants, Inc.", "city": "Verona", "state": "PA", "website": "christinedavisconsultants.com", "email": "kira@chrisdavis.net", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-112.074, 33.4484]}, "properties": {"name": "Chronicle Heritage", "city": "Phoenix", "state": "AZ", "website": "chronicleheritage.com", "email": "Info@ChronicleHeritage.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Unknown", "states_served": "AZ/MI/PA/multi - National", "source": "Web Research", "notes": "Offices in Dexter MI, West Chester PA + others. Formerly PaleoWest. National CRM firm."}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.1581, 39.7684]}, "properties": {"name": "Civil & Environmental Consultants, Inc.", "city": "Indianapolis", "state": "IN", "website": "cecinc.com", "email": "sterheide@cecinc.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IN/OH/multi", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "Clio Consulting", "city": "Pittsburgh", "state": "PA", "website": "", "email": "clioconsulting@me.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": "Arch survey, historic tax credit"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.412, 45.6366]}, "properties": {"name": "Commonwealth Heritage Group, Inc.", "city": "Rhinelander", "state": "WI", "website": "chg-inc.com", "email": "ssabatke@chg-inc.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WI/MN/multi", "source": "WI SHPO", "notes": "Also listed as Chronicle Heritage WI office"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "CTL Engineering", "city": "Columbus", "state": "OH", "website": "ctleng.com", "email": "jbrown@ctleng.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Cultural Heritage Research Services, Inc. (CHRS)", "city": "Pennsylvania", "state": "PA", "website": "chrsinc.com", "email": "KBasalik@CHRSINC.COM", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.5037, 38.0406]}, "properties": {"name": "Cultural Resource Analysts, Inc.", "city": "Lexington", "state": "KY", "website": "crai-ky.com", "email": "eagallow@crai-ky.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "Yes", "states_served": "KY/WV/multi", "source": "SHPO HA+Arch", "notes": "Archaeology, geophysical, arch history"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Designing Local", "city": "Columbus", "state": "OH", "website": "designinglocal.com", "email": "megan@designinglocal.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "Yes", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "HP Planning, Historic Landscape Arch"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-92.1005, 46.7867]}, "properties": {"name": "Duluth Archaeology Center", "city": "Duluth", "state": "MN", "website": "", "email": "archcenter@aol.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MN/WI", "source": "WI SHPO", "notes": "Prehistoric specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-71.1956, 42.5048]}, "properties": {"name": "EBI Consulting", "city": "Burlington", "state": "MA", "website": "ebiconsulting.com", "email": "mmayhan@ebiconsulting.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MA/multi", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.7248, 43.2836]}, "properties": {"name": "Edge Consulting Engineers", "city": "Prairie du Sac", "state": "WI", "website": "edgeconsult.com", "email": "jrieb@edgeconsult.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO+MI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.791, 40.0815]}, "properties": {"name": "EMH&T", "city": "New Albany", "state": "OH", "website": "", "email": "lampd@ohio.edu", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO Arch", "notes": "Engineering/env firm with archaeology"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.6266, 38.9989]}, "properties": {"name": "Environment & Archaeology, LLC", "city": "Florence", "state": "KY", "website": "enviro-arch.com", "email": "cstoll@enviro-arch.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "KY/OH/multi", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Environmental Design & Research", "city": "Columbus", "state": "OH", "website": "edrdpc.com", "email": "mkenneally@edrdpc.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "Environmental Solutions & Innovations, Inc.", "city": "Cincinnati", "state": "OH", "website": "envsi.com", "email": "quent@envsi.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.7113, 41.5772]}, "properties": {"name": "Eocene Environmental Group", "city": "West Des Moines", "state": "IA", "website": "", "email": "", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/multi", "source": "Job Search", "notes": "From job search research"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Feinknopf Macioce Schappa Architects", "city": "Columbus", "state": "OH", "website": "fmsarchitects.com", "email": "adaskalov@fmsarchitects.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "LEED"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.0205, 42.3178]}, "properties": {"name": "Firefly Preservation Consulting", "city": "Chelsea", "state": "MI", "website": "fireflypreservation.com", "email": "Cheri@fireflypreservation.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-92.0393, 45.041]}, "properties": {"name": "Florin Cultural Resource Services", "city": "Boyceville", "state": "WI", "website": "florincrs.com", "email": "florincrs11@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0637, 44.7272]}, "properties": {"name": "Fromm Applied Technology Geophysics", "city": "Abrams", "state": "WI", "website": "geophysicss.com", "email": "geophysics@geophysicss.com", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": "Remote sensing/geophysical specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9112, 40.4048]}, "properties": {"name": "GAI Consultants", "city": "Homestead", "state": "PA", "website": "gaiconsultants.com", "email": "j.glenn@gaiconsultants.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "PA/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.4702, 42.3712]}, "properties": {"name": "GEI Consultants, Inc.", "city": "Plymouth", "state": "MI", "website": "geiconsultants.com", "email": "cbrace@geiconsultants.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI/IL/CA/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-111.8508, 40.3916]}, "properties": {"name": "Geographic Services Inc.", "city": "Lehi", "state": "UT", "website": "", "email": "", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "Multi", "source": "Job Search", "notes": "From job search research"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "GFT Inc.", "city": "Pittsburgh", "state": "PA", "website": "gftinc.com", "email": "gkuncio@gftinc.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA/multi", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0342, 42.1103]}, "properties": {"name": "Global Archaeological Consulting", "city": "Palatine", "state": "IL", "website": "globalarchaeology.com", "email": "skatz@globalarchaeology.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IL/multi", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0133, 44.5133]}, "properties": {"name": "Golder Associates Inc.", "city": "Green Bay", "state": "WI", "website": "golder.com", "email": "dwilcox@golder.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WI/multi", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "Gray & Pape, Inc.", "city": "Cincinnati", "state": "OH", "website": "graypape.com", "email": "tboscarino@graypape.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "Yes", "underwater": "Yes", "rpa": "Yes", "states_served": "OH/IN/RI/multi", "source": "SHPO HA+Arch", "notes": "Major CRM firm; archaeology, underwater, geophysical, arch history"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.2484, 43.2342]}, "properties": {"name": "Great Lakes Heritage", "city": "Muskegon", "state": "MI", "website": "greatlakesheritage.com", "email": "", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Unknown", "states_served": "MI/Great Lakes region", "source": "Web Research", "notes": "Archaeology, survey, burial monitoring, cemetery compliance. Great Lakes regional focus."}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.5555, 42.7325]}, "properties": {"name": "Great Lakes Research, LLC", "city": "Lansing", "state": "MI", "website": "greatlakesresearchllc.com", "email": "mark.branstner@greatlakesresearchllc.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "MI/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.718, 38.792]}, "properties": {"name": "Great Rivers Archaeological Services", "city": "Burlington", "state": "KY", "website": "", "email": "v.versluis@juno.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "KY/multi", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Hardlines Design Company", "city": "Columbus", "state": "OH", "website": "hardlinesdesign.com", "email": "cdurst@hardlinesdesign.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.743, 42.2808]}, "properties": {"name": "HDR", "city": "Ann Arbor", "state": "MI", "website": "hdrinc.com", "email": "Kimberly.smith@HDRinc.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "MI/WI/multi/National", "source": "MI SHPO Arch+HA", "notes": "Large national engineering firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.113, 43.1881]}, "properties": {"name": "Heartsong Archaeology, LLC", "city": "Chesaning", "state": "MI", "website": "heartsongarchaeology.com", "email": "mlawton@heartsongarchaeology.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "Yes", "states_served": "MI/OH", "source": "SHPO Arch", "notes": "Geophysical specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-80.7209, 40.064]}, "properties": {"name": "Heritage Architectural Associates", "city": "Wheeling", "state": "WV", "website": "heritagearchitectural.com", "email": "savdakov@heritagearchitectural.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WV/OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9291, 40.1259]}, "properties": {"name": "Heritage Education and Research Services", "city": "Westerville", "state": "OH", "website": "heritageers.com", "email": "jmanson@heritageers.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "Historic Preservation Group, LLC", "city": "Cleveland", "state": "OH", "website": "historicpreservationgroup.com", "email": "michael@@hpgroup-llc.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.3783, 39.232]}, "properties": {"name": "HistoryWorks, LLC", "city": "Blue Ash", "state": "OH", "website": "historyworks.us", "email": "historyw@historyworks.us", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.3985, 40.6331]}, "properties": {"name": "Horsley Archaeological Prospection, LLC", "city": "Illinois", "state": "IL", "website": "", "email": "timhorsley@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "No", "states_served": "IL/WI/multi", "source": "WI SHPO", "notes": "Geophysical specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-97.7431, 30.2672]}, "properties": {"name": "ICF", "city": "Austin", "state": "TX", "website": "icf.com", "email": "Jon.dowling@icf.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "Multi/National", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.4708, 44.8547]}, "properties": {"name": "In Situ Archaeological Consulting", "city": "Eden Prairie", "state": "MN", "website": "insitucrm.com", "email": "aledezma@insitucrm.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MN/WI/multi", "source": "WI SHPO+MI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-87.9065, 43.0389]}, "properties": {"name": "Jacobs Engineering, Inc.", "city": "Milwaukee", "state": "WI", "website": "jacobs.com", "email": "Megan.harding@jacobs.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI/IL/MI/multi/National", "source": "MI SHPO Arch+HA", "notes": "Large global engineering firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.0458, 42.3314]}, "properties": {"name": "Kidorf Preservation Consulting", "city": "Detroit", "state": "MI", "website": "kidorfpreservationconsulting.com", "email": "Kristine@kidorfpreservationconsulting.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.1581, 39.7684]}, "properties": {"name": "Kieser Consulting Group, LLC", "city": "Indianapolis", "state": "IN", "website": "kieserconsult.com", "email": "davekieser@sbcglobal.net", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IN", "source": "SHPO HA", "notes": "HP Planning only"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.1141, 40.0993]}, "properties": {"name": "Kramb Consulting LLC", "city": "Dublin", "state": "OH", "website": "krambconsulting.com", "email": "Amy.kramb@krambconsulting.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-87.6298, 41.8781]}, "properties": {"name": "Langan Engineering and Environmental", "city": "Chicago", "state": "IL", "website": "langan.com/", "email": "hmcdanielmcdevitt@langan.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "Yes", "states_served": "IL/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Lawhon & Associates, Inc.", "city": "Columbus", "state": "OH", "website": "lawhon-assoc.com", "email": "bcarmichael@lawhon-assoc.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "LDA Architects", "city": "Cleveland", "state": "OH", "website": "ldaarchitecture.com", "email": "brianna@ldaarchitecture.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.4413, 41.1009]}, "properties": {"name": "Legacy Preservation Consulting, LLC", "city": "Tallmadge", "state": "OH", "website": "", "email": "legacypreservationconsulting@gmail.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "Independent"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "LGA Partners", "city": "Cleveland", "state": "OH", "website": "LGA-Partners.com", "email": "jstuck@LGA-Partners.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/PA", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.252, 41.6764]}, "properties": {"name": "Lochmueller Group", "city": "South Bend", "state": "IN", "website": "lochgroup.com", "email": "hblad@lochgroup.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IN/MO/multi", "source": "MI SHPO Arch+HA", "notes": "Note: also listed as Lohmueller in OH SHPO - same firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.2219, 42.4734]}, "properties": {"name": "Loggia Preservation LLC", "city": "Southfield", "state": "MI", "website": "loggiapreservation.com", "email": "katie@loggiapreservation.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI/OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.252, 41.6764]}, "properties": {"name": "Lohmueller Group", "city": "South Bend", "state": "IN", "website": "lochgroup.com", "email": "hblad@lochgroup.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IN/multi", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Lotis Environmental", "city": "Columbus", "state": "OH", "website": "", "email": "", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "Job Search", "notes": "From job search research"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.5552, 41.6639]}, "properties": {"name": "Lowlands Cultural Resources, LLC", "city": "Toledo", "state": "OH", "website": "", "email": "lowlandsculturalresources@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.6505, 42.5942]}, "properties": {"name": "Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians", "city": "Shelbyville", "state": "MI", "website": "", "email": "Kaila.akina@glt-nsn.gov", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO Arch", "notes": "Tribal historic preservation"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.504, 43.0978]}, "properties": {"name": "Mead & Hunt, Inc.", "city": "Middleton", "state": "WI", "website": "meadhunt.com", "email": "Emily.pettis@meadhunt.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI/CA/multi", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "Meld Architects, Inc.", "city": "Cleveland", "state": "OH", "website": "meldarchitects.com", "email": "mike@meldarchitects.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.265, 44.9778]}, "properties": {"name": "Merjent, Inc.", "city": "Minneapolis", "state": "MN", "website": "merjent.com", "email": "Bill.harding@merjent.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MN/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.1581, 39.7684]}, "properties": {"name": "Metric Environmental", "city": "Indianapolis", "state": "IN", "website": "metricenv.com", "email": "candaceh@metricenv.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IN/OH/multi", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-80.2123, 40.509]}, "properties": {"name": "Michael Baker International", "city": "Moon Township", "state": "PA", "website": "mbakerintl.com", "email": "Dean.nones@mbakerintl.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "PA/multi/National", "source": "MI SHPO Arch+HA", "notes": "Large national engineering firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-87.3773, 44.8342]}, "properties": {"name": "Midwest Archaeological Consultants", "city": "Sturgeon Bay", "state": "WI", "website": "midwestarchaeology.com", "email": "rdickson@midwestarchaeology.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "WI/multi", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.3985, 40.6331]}, "properties": {"name": "Midwest Archaeological Research Services, Inc.", "city": "Illinois", "state": "IL", "website": "", "email": "jmartinez.mars@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IL/WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-91.2396, 43.8014]}, "properties": {"name": "Mississippi Valley Archaeology Center", "city": "La Crosse", "state": "WI", "website": "", "email": "carzigian@uwlax.edu", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": "Academic/university program"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "MSA Design", "city": "Cincinnati", "state": "OH", "website": "msaarch.com", "email": "mwilliams@msaarch.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.3907, 41.4309]}, "properties": {"name": "Naylor Wellman, LLC", "city": "Chagrin Falls", "state": "OH", "website": "naylorwellman.com", "email": "naylor@naylorwellman.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-97.7431, 30.2672]}, "properties": {"name": "Oaklight Environmental Consulting", "city": "Austin", "state": "TX", "website": "oaklight.com", "email": "missi.green@oaklight.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "TX/WI/multi", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Ohio Valley Archaeology, Inc.", "city": "Columbus", "state": "OH", "website": "ovaigroup.com", "email": "jburks@ovaigroup.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "Yes", "states_served": "OH/multi", "source": "SHPO Arch", "notes": "Geophysical specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "OHM Advisors", "city": "Columbus", "state": "OH", "website": "ohm-advisors.com", "email": "Harvey.Schwager@ohm-advisors.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/multi", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Owen & Eastlake, Ltd.", "city": "Columbus", "state": "OH", "website": "oweneastlake.com", "email": "rkrupp@oweneastlake.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.6681, 42.9634]}, "properties": {"name": "Past Perfect, Inc.", "city": "Grand Rapids", "state": "MI", "website": "pastperfectinc.com", "email": "jennifermetz@pastperfectinc.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.412, 45.6366]}, "properties": {"name": "Pelican Rapids Archaeological Consulting", "city": "Rhinelander", "state": "WI", "website": "", "email": "mlaronge@frontiernet.net", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "Perspectus Architecture", "city": "Cleveland", "state": "OH", "website": "perspectus.com", "email": "bbroadus@perspectus.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "LEED, HP Planning"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.4012, 43.0731]}, "properties": {"name": "Phase One Archaeological Services", "city": "Madison", "state": "WI", "website": "", "email": "phaseonearchaeology@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI/multi", "source": "WI SHPO+MI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.2177, 39.3784]}, "properties": {"name": "Pinion Advisors", "city": "South Lebanon", "state": "OH", "website": "", "email": "wcunningham@pinionadvisors.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/KY", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.7982, 41.482]}, "properties": {"name": "PlaceMark Collaborative LLC", "city": "Lakewood", "state": "OH", "website": "", "email": "PlaceMarkCollaborative@gmail.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.1835, 42.5031]}, "properties": {"name": "PM Environmental", "city": "Berkley", "state": "MI", "website": "pmenv.com", "email": "Ginny.dougherty@pmenv.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-91.2396, 43.8014]}, "properties": {"name": "Ponte and Associates", "city": "La Crosse", "state": "WI", "website": "", "email": "Victorponterosalino@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": "Prehistoric only"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "Power Engineers", "city": "Cincinnati", "state": "OH", "website": "powereng.com", "email": "tanner.haynes@powereng.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "Yes", "rpa": "No", "states_served": "OH/OR/multi", "source": "MI SHPO Arch", "notes": "Maritime specialty also"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.6501, 39.7817]}, "properties": {"name": "Prairie Archaeology & Research", "city": "Springfield", "state": "IL", "website": "", "email": "", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IL/WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.4839, 42.7369]}, "properties": {"name": "Preservation Forward", "city": "East Lansing", "state": "MI", "website": "preservationfoward.com", "email": "jessica@preservationfoward.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.519, 41.0814]}, "properties": {"name": "PRIME AE Group, Inc.", "city": "Akron", "state": "OH", "website": "primeeng.com", "email": "cschreckenberger@primeeng.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.533, 39.7434]}, "properties": {"name": "Professional Archaeological Services Team", "city": "West Alexandria", "state": "OH", "website": "pasteam.com", "email": "c_keener@pasteam.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA+Arch", "notes": "History also"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.743, 42.2808]}, "properties": {"name": "Quinn Evans", "city": "Ann Arbor", "state": "MI", "website": "quinnevans.com", "email": "rmills@quinnevans.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI/multi", "source": "MI SHPO HA", "notes": "Architecture and historic preservation"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-77.4105, 39.4143]}, "properties": {"name": "R. Christopher Goodwin & Associates", "city": "Frederick", "state": "MD", "website": "rcgoodwin.com", "email": "mhornum@rcgoodwin.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MD/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.3907, 41.4309]}, "properties": {"name": "Rausche Historic Preservation, LLC", "city": "Chagrin Falls", "state": "OH", "website": "rauschehistoric.com", "email": "yrausche@sbcglobal.net", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-89.2179, 42.9169]}, "properties": {"name": "Red Gates Archaeology", "city": "Stoughton", "state": "WI", "website": "", "email": "redgatesarchaeology@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI/multi", "source": "WI SHPO+MI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.1394, 41.0793]}, "properties": {"name": "RESCOM Environmental Corp.", "city": "Fort Wayne", "state": "IN", "website": "rescom.org", "email": "jill.mcdevitt@rescom.org", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "IN/OH/multi", "source": "SHPO HA+Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-74.5132, 40.3165]}, "properties": {"name": "Richard Grubb and Associates, Inc.", "city": "Cranbury", "state": "NJ", "website": "richardgrubb.com", "email": "lalpert@richardgrubb.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "NJ/multi", "source": "SHPO HA", "notes": "History, Arch History"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Rue Environmental LLC", "city": "Pennsylvania", "state": "PA", "website": "rueenv.com", "email": "davidrue@rueenv.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.6944, 41.4993]}, "properties": {"name": "Sandvick Architects, Inc.", "city": "Cleveland", "state": "OH", "website": "sandvickarchitects.com", "email": "pketter@sandvickarchitects.com", "archaeology": "No", "arch_history": "Yes", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Schooley Caldwell", "city": "Columbus", "state": "OH", "website": "schooleycaldwell.com", "email": "kbaghsingh@schooleycaldwell.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "LEED"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "SEARCH, Inc.", "city": "Cincinnati", "state": "OH", "website": "searchinc.com", "email": "leeanne.mahoney@searchinc.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-86.1581, 39.7684]}, "properties": {"name": "SJCA, Inc.", "city": "Indianapolis", "state": "IN", "website": "", "email": "hdewey@sjcainc.com", "archaeology": "No", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "IN", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "Skelly and Loy", "city": "Pittsburgh", "state": "PA", "website": "skellyloy.com", "email": "klombardi@skellyloy.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA/WI/multi", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.4702, 42.3712]}, "properties": {"name": "SME", "city": "Plymouth", "state": "MI", "website": "sme-usa.com", "email": "Katie.delahoyde@sme-usa.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-94.7405, 32.5007]}, "properties": {"name": "Sphere 3 Environmental, LLC", "city": "Longview", "state": "TX", "website": "shpere3env.com", "email": "belew@shpere3env.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "TX/multi", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.7585, 38.2527]}, "properties": {"name": "Stantec Consulting Services, Inc.", "city": "Louisville", "state": "KY", "website": "stantec.com", "email": "jennifer.ryall@stantec.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "Multi/National", "source": "SHPO HA", "notes": "Large international firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Stell", "city": "Pennsylvania", "state": "PA", "website": "stellee.com", "email": "jerickson@stellee.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA/multi", "source": "PA SHPO", "notes": "Strong remote GIS/archaeology focus - previously identified as top job target"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-81.519, 41.0814]}, "properties": {"name": "Stewards of Historical Preservation (SHiP)", "city": "Akron", "state": "OH", "website": "neoship.org", "email": "historicakron@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO Arch", "notes": "Volunteer/nonprofit org"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Stone Environmental, Engineering & Science", "city": "Columbus", "state": "OH", "website": "stoneenvironmental.com", "email": "frankcarvino@stoneenvironmental.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.09, 44.9537]}, "properties": {"name": "Summit Envirosolutions, Inc.", "city": "St. Paul", "state": "MN", "website": "summite.com", "email": "mobrien@summite.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MN/WI", "source": "WI SHPO", "notes": "Prehistoric specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-76.8867, 40.2732]}, "properties": {"name": "Susquehanna Civil, Inc.", "city": "Pennsylvania", "state": "PA", "website": "sqcivil.com", "email": "", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-80.1134, 40.359]}, "properties": {"name": "SWCA Environmental Consultants", "city": "Bridgeville", "state": "PA", "website": "swca.com", "email": "derek.duquette@swca.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "Multi/National", "source": "SHPO HA+Arch", "notes": "National firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-84.512, 39.1031]}, "properties": {"name": "Terracon", "city": "Cincinnati", "state": "OH", "website": "terracon.com", "email": "kelly.higelmire@terracon.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "Yes", "rpa": "Yes", "states_served": "Multi/National", "source": "SHPO HA+Arch", "notes": "Large national engineering/env firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-118.1445, 34.1478]}, "properties": {"name": "Tetra Tech", "city": "Pasadena", "state": "CA", "website": "tetratech.com", "email": "", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "National", "source": "Job Search", "notes": "Large national environmental firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-93.09, 44.9537]}, "properties": {"name": "The 106 Group", "city": "St. Paul", "state": "MN", "website": "106group.com", "email": "adamkaeding@106group.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "MN/multi", "source": "MI SHPO Arch+HA", "notes": "Section 106 specialty firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-106.6504, 35.0844]}, "properties": {"name": "The Archaeological Conservancy", "city": "Albuquerque", "state": "NM", "website": "thearchcons.org", "email": "Lindsay@thearchcons.org", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "Multi/National", "source": "WI SHPO", "notes": "Nonprofit land preservation org"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.6552, 41.5634]}, "properties": {"name": "The Mannik & Smith Group, Inc.", "city": "Maumee", "state": "OH", "website": "manniksmithgroup.com", "email": "Rchidester@manniksmithgroup.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "Yes", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "Yes", "states_served": "OH", "source": "SHPO HA+Arch", "notes": "Multi-discipline engineering/env firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.2367, 40.2426]}, "properties": {"name": "The Markosky Engineering Group, Inc.", "city": "Ligonier", "state": "PA", "website": "markosky.com", "email": "dcress@markosky.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "No", "states_served": "PA", "source": "PA SHPO+MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.5552, 41.6639]}, "properties": {"name": "Thomas Porter Architects", "city": "Toledo", "state": "OH", "website": "thomasporterarchitects.com", "email": "julie@apt@porterarch.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": "Architecture"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "TransSystems", "city": "Columbus", "state": "OH", "website": "transystems.com", "email": "artaylor@transystems.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-79.9959, 40.4406]}, "properties": {"name": "TRC Companies", "city": "Pittsburgh", "state": "PA", "website": "trccompanies.com", "email": "JMcKissick@trccompanies.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "Yes", "underwater": "No", "rpa": "Yes", "states_served": "PA/WI/multi", "source": "PA SHPO+MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.1065, 43.0606]}, "properties": {"name": "TRC Environmental Corporation", "city": "Brookfield", "state": "WI", "website": "trccompanies.com", "email": "rklabacka@trcsolutions.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI/PA/multi", "source": "MI SHPO Arch+HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-90.1994, 38.627]}, "properties": {"name": "Trileaf Corporation", "city": "St. Louis", "state": "MO", "website": "trileaf.com", "email": "s.stretton@trileaf.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MO/WI/multi", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-87.9065, 43.0389]}, "properties": {"name": "University of Wisconsin-Milwaukee CRM Program", "city": "Milwaukee", "state": "WI", "website": "uwm.edu", "email": "haasjr@uwm.edu", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO+MI SHPO HA", "notes": "Academic program"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.8024, 41.522]}, "properties": {"name": "Veritas Cultural Resource Services", "city": "Whitehouse", "state": "OH", "website": "", "email": "Janet.rozick@gmail.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.0458, 42.3314]}, "properties": {"name": "Vinewood Preservation Planning", "city": "Detroit", "state": "MI", "website": "", "email": "timothy@vinewoodplanning.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.0458, 42.3314]}, "properties": {"name": "Wade Trim", "city": "Detroit", "state": "MI", "website": "wadetrim.com", "email": "amullen@wadetrim.com", "archaeology": "No", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI/multi", "source": "MI SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-83.8088, 39.9242]}, "properties": {"name": "WDC Group, LLC", "city": "Springfield", "state": "OH", "website": "wdc-group.us", "email": "widenerc@wdc-group.com", "archaeology": "No", "arch_history": "No", "architecture": "Yes", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "Weller & Associates, Inc.", "city": "Columbus", "state": "OH", "website": "wellercrm.com", "email": "s.mcintosh@wellercrm.com", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "Yes", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH", "source": "SHPO HA+Arch", "notes": "CRM-focused firm"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-85.865, 42.87]}, "properties": {"name": "West Michigan Archaeological Consultants", "city": "Hudsonville", "state": "MI", "website": "", "email": "brashlerj@mac.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "MI", "source": "MI SHPO Arch", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-82.9988, 39.9612]}, "properties": {"name": "WestLand Engineering", "city": "Columbus", "state": "OH", "website": "", "email": "", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "OH/multi", "source": "Job Search", "notes": "From job search research"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-97.0329, 47.9253]}, "properties": {"name": "Widseth", "city": "Grand Forks", "state": "ND", "website": "Widseth.com", "email": "Graham.Goodwin@Widseth.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "ND/WI", "source": "WI SHPO", "notes": "Prehistoric specialty"}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-88.0484, 44.6341]}, "properties": {"name": "Wisconsin Archaeological Consultants LLC", "city": "Suamico", "state": "WI", "website": "", "email": "wiarchconsult@gmail.com", "archaeology": "Yes", "arch_history": "No", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "WI", "source": "WI SHPO", "notes": ""}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-74.006, 40.7128]}, "properties": {"name": "WSP", "city": "New York", "state": "NY", "website": "wsp.com", "email": "", "archaeology": "Yes", "arch_history": "Yes", "architecture": "No", "historic_arch": "No", "hp_planning": "No", "landscape_arch": "No", "geophysical": "No", "underwater": "No", "rpa": "No", "states_served": "National", "source": "Job Search", "notes": "Large international firm"}}]};
 
-// ── MAP INIT ──────────────────────────────────────────────────────────────
-const map = L.map('map', {
-  center: [42.8, -84.0],
-  zoom: 7,
-  zoomControl: true
-});
-
+// MAP
+const map = L.map('map', { center:[42.5, -84.5], zoom:7 });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 19
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom:19
 }).addTo(map);
 
-// ── MARKER COLORS ─────────────────────────────────────────────────────────
+// COLORS
 function getColor(p) {
   const arch = p.archaeology === 'Yes';
   const hist = p.arch_history === 'Yes';
@@ -497,138 +181,114 @@ function getColor(p) {
 
 function makeIcon(color) {
   return L.divIcon({
-    className: '',
-    html: `<div style="
-      width:11px;height:11px;border-radius:50%;
-      background:${color};
-      border:2px solid rgba(255,255,255,0.5);
-      box-shadow:0 1px 4px rgba(0,0,0,0.5);
-    "></div>`,
-    iconSize: [11, 11],
-    iconAnchor: [5, 5],
-    popupAnchor: [0, -8]
+    className:'',
+    html:`<div style="width:11px;height:11px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.6);box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+    iconSize:[11,11], iconAnchor:[5,5], popupAnchor:[0,-8]
   });
 }
 
-// ── CLUSTER GROUP ─────────────────────────────────────────────────────────
+// CLUSTER
 const clusterGroup = L.markerClusterGroup({
-  maxClusterRadius: 40,
+  maxClusterRadius:40,
   iconCreateFunction: function(cluster) {
-    const count = cluster.getChildCount();
-    const size = count < 10 ? 28 : count < 30 ? 34 : 40;
+    const n = cluster.getChildCount();
+    const s = n < 10 ? 28 : n < 30 ? 34 : 40;
     return L.divIcon({
-      html: `<div style="
-        width:${size}px;height:${size}px;border-radius:50%;
-        background:#4A3728;border:2px solid #C4893A;
-        display:flex;align-items:center;justify-content:center;
-        font-family:Inter,sans-serif;font-size:${size<34?'0.7':'0.75'}rem;
-        font-weight:600;color:#F5F0E8;
-        box-shadow:0 2px 8px rgba(0,0,0,0.5);
-      ">${count}</div>`,
-      className: '',
-      iconSize: [size, size],
-      iconAnchor: [size/2, size/2]
+      html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:#4A3728;border:2px solid #C4893A;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-size:0.72rem;font-weight:600;color:#F5F0E8;box-shadow:0 2px 8px rgba(0,0,0,0.4);">${n}</div>`,
+      className:'', iconSize:[s,s], iconAnchor:[s/2,s/2]
     });
   }
 });
 
-// ── BUILD POPUP ───────────────────────────────────────────────────────────
+// POPUP
 function buildPopup(p) {
   const tags = [];
-  if (p.archaeology  === 'Yes') tags.push('<span class="tag tag-arch">Archaeology</span>');
-  if (p.arch_history === 'Yes') tags.push('<span class="tag tag-hist">Arch. History</span>');
-  if (p.geophysical  === 'Yes') tags.push('<span class="tag tag-geo">Geophysical</span>');
-  if (p.underwater   === 'Yes') tags.push('<span class="tag tag-uw">Underwater</span>');
-  if (p.rpa          === 'Yes') tags.push('<span class="tag tag-rpa">RPA</span>');
-  if (p.hp_planning  === 'Yes') tags.push('<span class="tag tag-hist">HP Planning</span>');
-  if (p.landscape_arch === 'Yes') tags.push('<span class="tag tag-arch">Landscape Arch</span>');
+  if (p.archaeology   === 'Yes') tags.push('<span class="tag tag-arch">Archaeology</span>');
+  if (p.arch_history  === 'Yes') tags.push('<span class="tag tag-hist">Arch. History</span>');
+  if (p.geophysical   === 'Yes') tags.push('<span class="tag tag-geo">Geophysical</span>');
+  if (p.underwater    === 'Yes') tags.push('<span class="tag tag-uw">Underwater</span>');
+  if (p.rpa           === 'Yes') tags.push('<span class="tag tag-rpa">RPA</span>');
+  if (p.hp_planning   === 'Yes') tags.push('<span class="tag tag-hist">HP Planning</span>');
+  if (p.landscape_arch=== 'Yes') tags.push('<span class="tag tag-arch">Landscape</span>');
 
-  const website = p.website
-    ? `<a class="popup-link" href="https://${p.website}" target="_blank">${p.website} &#8599;</a>`
-    : '';
+  const states  = p.states_served ? `<div class="popup-row"><strong>States:</strong> ${p.states_served}</div>` : '';
+  const email   = p.email         ? `<div class="popup-row"><strong>Email:</strong> <a href="mailto:${p.email}" style="color:var(--ochre)">${p.email}</a></div>` : '';
+  const website = p.website       ? `<a class="popup-link" href="https://${p.website}" target="_blank">${p.website} ↗</a>` : '';
+  const notes   = p.notes         ? `<div class="popup-notes">${p.notes}</div>` : '';
+  const source  = p.source        ? `<div class="popup-source">Source: ${p.source}</div>` : '';
 
-  const states = p.states_served
-    ? `<div class="popup-row"><strong>States served:</strong> ${p.states_served}</div>`
-    : '';
-
-  const notes = p.notes
-    ? `<div class="popup-notes">${p.notes}</div>`
-    : '';
-
-  const email = p.email
-    ? `<div class="popup-row"><strong>Contact:</strong> <a href="mailto:${p.email}" style="color:var(--ochre)">${p.email}</a></div>`
-    : '';
-
-  const source = p.source
-    ? `<div style="font-size:0.62rem;color:#6a6458;margin-top:6px;">Source: ${p.source}</div>`
-    : '';
-
-  return `
-    <div style="min-width:220px;max-width:270px;">
-      <div class="popup-name">${p.name}</div>
-      <div class="popup-location">${p.city ? p.city + ', ' : ''}${p.state}</div>
-      <div class="popup-tags">${tags.join('')}</div>
-      ${states}
-      ${email}
-      ${website}
-      ${notes}
-      ${source}
-    </div>`;
+  return `<div style="min-width:210px;max-width:260px;">
+    <div class="popup-name">${p.name}</div>
+    <div class="popup-location">${p.city ? p.city+', ':'' }${p.state}</div>
+    <div class="popup-tags">${tags.join('')}</div>
+    ${states}${email}${website}${notes}${source}
+  </div>`;
 }
 
-// ── MARKERS ───────────────────────────────────────────────────────────────
-let allMarkers = [];
-
+// BUILD MARKERS
+const allMarkers = [];
 firmData.features.forEach(f => {
   const p = f.properties;
   const [lng, lat] = f.geometry.coordinates;
-  const color = getColor(p);
-  const marker = L.marker([lat, lng], { icon: makeIcon(color) });
-  marker.bindPopup(buildPopup(p), { maxWidth: 280 });
+  const marker = L.marker([lat, lng], { icon: makeIcon(getColor(p)) });
+  marker.bindPopup(buildPopup(p), { maxWidth:280 });
   marker.firmProps = p;
   allMarkers.push(marker);
 });
-
 clusterGroup.addLayers(allMarkers);
 map.addLayer(clusterGroup);
 
-// ── SIDEBAR LIST ──────────────────────────────────────────────────────────
-function getTags(p) {
-  const tags = [];
-  if (p.archaeology  === 'Yes') tags.push('<span class="tag tag-arch">Arch</span>');
-  if (p.arch_history === 'Yes') tags.push('<span class="tag tag-hist">Hist</span>');
-  if (p.geophysical  === 'Yes') tags.push('<span class="tag tag-geo">Geo</span>');
-  if (p.underwater   === 'Yes') tags.push('<span class="tag tag-uw">UW</span>');
-  if (p.rpa          === 'Yes') tags.push('<span class="tag tag-rpa">RPA</span>');
-  return tags.join('');
+// SIDEBAR TAGS
+function getSidebarTags(p) {
+  const t = [];
+  if (p.archaeology  === 'Yes') t.push('<span class="tag tag-arch">Arch</span>');
+  if (p.arch_history === 'Yes') t.push('<span class="tag tag-hist">Hist</span>');
+  if (p.geophysical  === 'Yes') t.push('<span class="tag tag-geo">Geo</span>');
+  if (p.underwater   === 'Yes') t.push('<span class="tag tag-uw">UW</span>');
+  if (p.rpa          === 'Yes') t.push('<span class="tag tag-rpa">RPA</span>');
+  return t.join('');
 }
 
+// STATE COUNTS
+function updateStateCounts(markers) {
+  const counts = {};
+  markers.forEach(m => {
+    const s = m.firmProps.state || 'Unknown';
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,12);
+  document.getElementById('state-counts').innerHTML = sorted.map(([s,n]) =>
+    `<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:3px;">
+      <span>${s}</span><span style="color:var(--ochre);font-weight:600;">${n}</span>
+    </div>`
+  ).join('');
+}
+
+// POPULATE LIST
 function populateList(markers) {
-  const list = document.getElementById('firm-list');
   document.getElementById('visible-count').textContent = markers.length;
+  const list = document.getElementById('firm-list');
   list.innerHTML = '';
-  const sorted = [...markers].sort((a,b) => a.firmProps.name.localeCompare(b.firmProps.name));
-  sorted.forEach(m => {
+  [...markers].sort((a,b) => a.firmProps.name.localeCompare(b.firmProps.name)).forEach(m => {
     const p = m.firmProps;
     const div = document.createElement('div');
     div.className = 'firm-item';
     div.innerHTML = `
       <div class="firm-item-name">${p.name}</div>
-      <div class="firm-item-meta">${p.city ? p.city + ', ' : ''}${p.state}</div>
-      <div class="firm-item-tags">${getTags(p)}</div>`;
+      <div class="firm-item-meta">${p.city ? p.city+', ':'' }${p.state}</div>
+      <div class="firm-item-tags">${getSidebarTags(p)}</div>`;
     div.addEventListener('click', () => {
       map.setView(m.getLatLng(), 10);
       clusterGroup.zoomToShowLayer(m, () => m.openPopup());
     });
     list.appendChild(div);
   });
+  updateStateCounts(markers);
 }
 
-populateList(allMarkers);
-
-// ── FILTER LOGIC ─────────────────────────────────────────────────────────
+// FILTER
 let activeFilter = 'all';
-let searchTerm = '';
+let searchTerm   = '';
 
 function applyFilters() {
   const filtered = allMarkers.filter(m => {
@@ -637,17 +297,17 @@ function applyFilters() {
     const q = searchTerm.toLowerCase();
     const matchSearch = !q ||
       p.name.toLowerCase().includes(q) ||
-      (p.city || '').toLowerCase().includes(q) ||
-      (p.state || '').toLowerCase().includes(q) ||
-      (p.states_served || '').toLowerCase().includes(q);
+      (p.city||'').toLowerCase().includes(q) ||
+      (p.state||'').toLowerCase().includes(q) ||
+      (p.states_served||'').toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
-
   clusterGroup.clearLayers();
   clusterGroup.addLayers(filtered);
   populateList(filtered);
 }
 
+// EVENTS - Filters
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -657,11 +317,13 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+// EVENTS - Search
 document.getElementById('search-input').addEventListener('input', e => {
   searchTerm = e.target.value;
   applyFilters();
 });
 
+// EVENTS - Reset
 document.getElementById('reset-btn').addEventListener('click', () => {
   activeFilter = 'all';
   searchTerm = '';
@@ -669,52 +331,29 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('[data-filter="all"]').classList.add('active');
   applyFilters();
-  map.setView([42.8, -84.0], 7);
+  map.setView([42.5, -84.5], 7);
 });
 
-// Home button
+// EVENTS - Home button
 document.getElementById('home-btn').addEventListener('click', () => {
-  map.setView([42.8, -84.0], 7);
+  map.setView([42.5, -84.5], 7);
 });
 
-// About modal
+// EVENTS - About modal
 document.getElementById('about-btn').addEventListener('click', () => {
-  document.getElementById('about-modal').style.display = 'flex';
+  document.getElementById('about-modal').classList.add('open');
 });
 document.getElementById('close-about').addEventListener('click', () => {
-  document.getElementById('about-modal').style.display = 'none';
+  document.getElementById('about-modal').classList.remove('open');
 });
-document.getElementById('about-modal').addEventListener('click', (e) => {
+document.getElementById('about-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('about-modal')) {
-    document.getElementById('about-modal').style.display = 'none';
+    document.getElementById('about-modal').classList.remove('open');
   }
 });
 
-// State counts
-function updateStateCounts(markers) {
-  const counts = {};
-  markers.forEach(m => {
-    const s = m.firmProps.state || 'Unknown';
-    counts[s] = (counts[s] || 0) + 1;
-  });
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 10);
-  document.getElementById('state-counts').innerHTML = sorted
-    .map(([s,n]) => `<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:3px;">
-      <span>${s}</span><span style="color:var(--ochre);font-weight:600;">${n}</span>
-    </div>`).join('');
-}
-
-// Hook into applyFilters to also update state counts
-const _origApply = applyFilters;
-// Patch populateList to also update state counts
-const _origPopulate = populateList;
-function populateList(markers) {
-  _origPopulate(markers);
-  updateStateCounts(markers);
-}
-
-// Initial state counts
-updateStateCounts(allMarkers);
+// INIT
+populateList(allMarkers);
 
 }); // end DOMContentLoaded
 </script>
