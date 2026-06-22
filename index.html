@@ -415,16 +415,9 @@ const map = L.map('map', {
   zoomControl: true
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_no_labels/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18
-}).addTo(map);
-
-// Subtle state labels layer
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_only_labels/{z}/{x}/{y}{r}.png', {
-  attribution: '',
-  maxZoom: 18,
-  opacity: 0.6
 }).addTo(map);
 
 // ── MARKER COLORS ─────────────────────────────────────────────────────────
