@@ -396,10 +396,10 @@
 <!-- Legend -->
 <div class="map-legend">
   <div class="leg-title">Specialty</div>
-  <div class="leg-row"><div class="leg-dot" style="background:#5C7A5E"></div>Archaeology</div>
-  <div class="leg-row"><div class="leg-dot" style="background:#C4893A"></div>Arch. History</div>
-  <div class="leg-row"><div class="leg-dot" style="background:#7A5C7A"></div>Both</div>
-  <div class="leg-row"><div class="leg-dot" style="background:#3a6080"></div>Other</div>
+  <div class="leg-row"><div class="leg-dot" style="background:#2A6E3F"></div>Archaeology</div>
+  <div class="leg-row"><div class="leg-dot" style="background:#B5640A"></div>Arch. History</div>
+  <div class="leg-row"><div class="leg-dot" style="background:#6B3FA0"></div>Both</div>
+  <div class="leg-row"><div class="leg-dot" style="background:#1A4F6E"></div>Other</div>
   <button class="reset-btn" id="reset-btn">Reset Filters</button>
 </div>
 
@@ -415,19 +415,19 @@ const map = L.map('map', {
   zoomControl: true
 });
 
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  maxZoom: 18
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
 }).addTo(map);
 
 // ── MARKER COLORS ─────────────────────────────────────────────────────────
 function getColor(p) {
   const arch = p.archaeology === 'Yes';
   const hist = p.arch_history === 'Yes';
-  if (arch && hist) return '#7A5C7A';
-  if (arch)         return '#5C7A5E';
-  if (hist)         return '#C4893A';
-  return '#3a6080';
+  if (arch && hist) return '#6B3FA0';
+  if (arch)         return '#2A6E3F';
+  if (hist)         return '#B5640A';
+  return '#1A4F6E';
 }
 
 function makeIcon(color) {
